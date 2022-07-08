@@ -1,0 +1,18 @@
+project(cp2102n)
+
+set(SRCS "src/cp2102n.c")
+
+add_library(${PROJECT_NAME} SHARED
+    ${SRCS}
+    ${CMAKE_JS_SRC}
+)
+
+set_target_properties(${PROJECT_NAME} PROPERTIES
+    PREFIX ""
+    SUFFIX ".node"
+)
+
+target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_JS_INC})
+
+target_link_libraries(${PROJECT_NAME} cp2102_usb)

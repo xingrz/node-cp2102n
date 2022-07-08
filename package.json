@@ -1,15 +1,34 @@
 {
   "name": "cp2102n",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Cross-platform Node.js binding for controlling GPIOs on Silicon Labs CP2102N",
+  "main": "lib/index.js",
+  "scripts": {
+    "build:ts": "tsc -p .",
+    "build:addon": "cmake-js compile",
+    "build": "npm run build:ts && npm run build:addon"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/xingrz/node-cp2102n.git"
   },
+  "keywords": [
+    "cp2102",
+    "cp2102n"
+  ],
   "author": "XiNGRZ <hi@xingrz.me>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/xingrz/node-cp2102n/issues"
   },
-  "homepage": "https://github.com/xingrz/node-cp2102n#readme"
+  "homepage": "https://github.com/xingrz/node-cp2102n#readme",
+  "dependencies": {
+    "bindings": "^1.5.0",
+    "cmake-js": "^6.3.2"
+  },
+  "devDependencies": {
+    "@tsconfig/node16-strictest": "^1.0.3",
+    "@types/bindings": "^1.5.1",
+    "typescript": "^4.7.4"
+  }
 }
