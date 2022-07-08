@@ -6,7 +6,9 @@
   "scripts": {
     "build:ts": "tsc -p .",
     "build:addon": "cmake-js compile",
-    "build": "npm run build:ts && npm run build:addon"
+    "build": "npm run build:ts && npm run build:addon",
+    "prepack": "npm run build:ts",
+    "install": "node . 2>/dev/null || npm run build:addon"
   },
   "repository": {
     "type": "git",
