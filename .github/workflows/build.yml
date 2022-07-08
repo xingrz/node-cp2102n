@@ -77,3 +77,29 @@ jobs:
         with:
           name: ${{ steps.build.outputs.tarball }}
           path: ${{ steps.build.outputs.tarball }}
+
+  test:
+    needs: build-ts
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        node: ['10', '12', '14', '16', '18', 'lts/*', 'current']
+
+    steps:
+      - name: Use Node.js ${{ matrix.node }} on ${{ matrix.os }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Download tarball
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.build-ts.outputs.tarball }}
+
+      - name: Install tarball
+        run: npm install ${{ needs.build-ts.outputs.tarball }}
+
+      - name: Test
+        run: node -p 'require("cp2102n")'
