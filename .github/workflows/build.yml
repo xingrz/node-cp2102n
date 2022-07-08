@@ -5,7 +5,7 @@ on:
   - pull_request
 
 jobs:
-  build:
+  build-addon:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -42,3 +42,38 @@ jobs:
           name: prebuilds
           path: prebuilds
           retention-days: 1
+
+  build-ts:
+    needs: build-addon
+    runs-on: ubuntu-latest
+
+    outputs:
+      tarball: ${{ steps.build.outputs.tarball }}
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Use Node.js LTS
+        uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+          cache: 'npm'
+
+      - name: Download prebuilt artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: prebuilds
+          path: prebuilds
+
+      - name: Build NPM package
+        id: build
+        run: |
+          npm ci --ignore-scripts
+          npm run build:ts
+          echo "::set-output name=tarball::$(npm pack)"
+
+      - name: Upload tarball
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ steps.build.outputs.tarball }}
+          path: ${{ steps.build.outputs.tarball }}
