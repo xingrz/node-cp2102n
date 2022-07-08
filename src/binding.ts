@@ -1,4 +1,4 @@
-import load from 'bindings';
+import { join, resolve } from 'path';
 
 export interface Interface {
   get(): Promise<number>;
@@ -11,4 +11,19 @@ export interface Binding {
   openInterface(path: string): Promise<Interface>;
 }
 
-export default <Binding>load('cp2102n');
+export default ((name: string): Binding => {
+  const moduleRoot = resolve(__dirname, '..');
+  const paths = [
+    join(moduleRoot, 'build', 'Release', name),
+    join(moduleRoot, 'prebuilds', `${process.platform}-${process.arch}`, name)
+  ];
+
+  for (const path of paths) {
+    try {
+      return require(path);
+    } catch (e) {
+    }
+  }
+
+  throw new Error('Failed loading addon');
+})('cp2102n.node');

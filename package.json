@@ -28,12 +28,11 @@
   },
   "homepage": "https://github.com/xingrz/node-cp2102n#readme",
   "dependencies": {
-    "bindings": "^1.5.0",
     "cmake-js": "^6.3.2"
   },
   "devDependencies": {
     "@tsconfig/node16-strictest": "^1.0.3",
-    "@types/bindings": "^1.5.1",
+    "@types/node": "^18.0.3",
     "typescript": "^4.7.4"
   }
 }

@@ -29,5 +29,16 @@ jobs:
         if: matrix.os == 'macos-latest'
         run: brew install cmake ninja pkg-config libusb
 
-      - name: Install and build
-        run: npm ci && npm run build
+      - name: Build addon
+        run: |
+          npm ci
+          PREBUILD_DIR=prebuilds/$(node -p '`${process.platform}-${process.arch}`')
+          mkdir -p $PREBUILD_DIR
+          cp build/Release/cp2102n.node $PREBUILD_DIR/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: prebuilds
+          path: prebuilds
+          retention-days: 1
