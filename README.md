@@ -1,4 +1,4 @@
-node-cp2102n
+node-cp2102n [![build](https://github.com/xingrz/node-cp2102n/actions/workflows/build.yml/badge.svg)](https://github.com/xingrz/node-cp2102n/actions/workflows/build.yml)
 ==========
 
 [![][npm-version]][npm-url] [![][npm-downloads]][npm-url] [![license][license-img]][license-url] [![issues][issues-img]][issues-url] [![stars][stars-img]][stars-url] [![commits][commits-img]][commits-url]

@@ -9,4 +9,6 @@ node_modules
 *.log
 *.tgz
 
+/.github
+/.clang-format
 /tsconfig.json
