@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "description": "Cross-platform Node.js binding for controlling GPIOs on Silicon Labs CP2102N",
   "main": "lib/index.js",
+  "engines": {
+    "node": ">= 10.20.0"
+  },
   "scripts": {
     "build:ts": "tsc -p .",
     "build:addon": "cmake-js compile",
