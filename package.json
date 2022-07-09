@@ -1,0 +1,15 @@
+{
+  "name": "cp2102n",
+  "version": "0.0.0",
+  "description": "Cross-platform Node.js binding for controlling GPIOs on Silicon Labs CP2102N",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xingrz/node-cp2102n.git"
+  },
+  "author": "XiNGRZ <hi@xingrz.me>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/xingrz/node-cp2102n/issues"
+  },
+  "homepage": "https://github.com/xingrz/node-cp2102n#readme"
+}
