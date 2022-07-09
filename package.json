@@ -11,7 +11,7 @@
     "build:addon": "cmake-js compile",
     "build": "npm run build:ts && npm run build:addon",
     "prepublishOnly": "npm run build:ts",
-    "install": "node . 2>/dev/null || npm run build:addon"
+    "install": "node scripts/check-prebuild.cjs || npm run build:addon"
   },
   "repository": {
     "type": "git",

@@ -23,18 +23,22 @@ This package shiped with prebuilt Node.js native addon for following platforms:
 
 ### Build from source
 
+```sh
+npm install --save cp2102n --build-from-source
+```
+
+Additional build dependencies are required on different platforms:
+
 #### Debian/Ubuntu
 
 ```sh
 sudo apt install -y build-essential cmake ninja-build pkg-config libusb-1.0-0-dev
-npm run build
 ```
 
 #### macOS
 
 ```sh
 brew install cmake ninja pkg-config libusb
-npm run build
 ```
 
 ### Runtime depencencies
