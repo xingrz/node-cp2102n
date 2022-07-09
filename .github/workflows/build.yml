@@ -31,7 +31,9 @@ jobs:
 
       - name: Build addon
         run: |
-          npm ci
+          set -euo pipefail
+          npm ci --ignore-scripts
+          npm run build:addon
           PREBUILD_DIR=prebuilds/$(node -p '`${process.platform}-${process.arch}`')
           mkdir -p $PREBUILD_DIR
           cp build/Release/cp2102n.node $PREBUILD_DIR/
@@ -43,8 +45,48 @@ jobs:
           path: prebuilds
           retention-days: 1
 
+  build-addon-docker:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        platform: [linux/arm/v7, linux/arm64]
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Install and build for ${{ matrix.platform }}
+        uses: kohlerdominik/docker-run-action@v1
+        with:
+          image: node:lts
+          shell: /bin/bash
+          workdir: /workspace
+          volumes: |
+            ${{ github.workspace }}:/workspace
+          options: |
+            --platform ${{ matrix.platform }}
+          run: |
+            set -euo pipefail
+            apt-get update
+            apt-get install -y build-essential cmake ninja-build pkg-config libusb-1.0-0-dev
+            npm ci --ignore-scripts
+            npm run build:addon
+            PREBUILD_DIR=prebuilds/$(node -p '`${process.platform}-${process.arch}`')
+            mkdir -p $PREBUILD_DIR
+            cp build/Release/cp2102n.node $PREBUILD_DIR/
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: prebuilds
+          path: prebuilds
+          retention-days: 1
+
   build-ts:
-    needs: build-addon
+    needs: [build-addon, build-addon-docker]
     runs-on: ubuntu-latest
 
     outputs:
@@ -68,6 +110,7 @@ jobs:
       - name: Build NPM package
         id: build
         run: |
+          set -euo pipefail
           npm ci --ignore-scripts
           npm run build:ts
           echo "::set-output name=tarball::$(npm pack)"
@@ -103,3 +146,38 @@ jobs:
 
       - name: Test
         run: node -p 'require("cp2102n")'
+
+  test-docker:
+    needs: build-ts
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        platform: [linux/arm/v7, linux/arm64]
+        node: ['10', '12', '14', '16', '18', 'lts', 'latest']
+
+    steps:
+      - name: Download tarball
+        uses: actions/download-artifact@v2
+        with:
+          name: ${{ needs.build-ts.outputs.tarball }}
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+
+      - name: Install and build for Node.js ${{ matrix.node }} on ${{ matrix.platform }}
+        uses: kohlerdominik/docker-run-action@v1
+        with:
+          image: node:${{ matrix.node }}
+          shell: /bin/bash
+          workdir: /workspace
+          volumes: |
+            ${{ github.workspace }}:/workspace
+          options: |
+            --platform ${{ matrix.platform }}
+          run: |
+            set -euo pipefail
+            apt-get update
+            apt-get install -y libusb-1.0-0
+            npm install ${{ needs.build-ts.outputs.tarball }}
+            node -p 'require("cp2102n")'

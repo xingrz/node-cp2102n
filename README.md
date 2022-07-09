@@ -18,8 +18,8 @@ This package shiped with prebuilt Node.js native addon for following platforms:
 |       | linux | darwin | win32 |
 |-------|-------|--------|-------|
 | x64   | ✓     | ✓      | TODO  |
-| arm   |       |        |       |
-| arm64 |       |        |       |
+| arm   | ✓     | n/a    | n/a   |
+| arm64 | ✓     | TODO   |       |
 
 ### Build from source
 
