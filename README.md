@@ -11,9 +11,19 @@ Cross-platform Node.js binding for controlling GPIOs on Silicon Labs CP2102N.
 npm install --save cp2102n
 ```
 
+### Prebuilt addon
+
+This package shiped with prebuilt Node.js native addon for following platforms:
+
+|       | linux | darwin | win32 |
+|-------|-------|--------|-------|
+| x64   | ✓     | ✓      | TODO  |
+| arm   |       |        |       |
+| arm64 |       |        |       |
+
 ### Build from source
 
-#### Linux
+#### Debian/Ubuntu
 
 ```sh
 sudo apt install -y build-essential cmake ninja-build pkg-config libusb-1.0-0-dev
@@ -23,8 +33,22 @@ npm run build
 #### macOS
 
 ```sh
-brew info cmake ninja pkg-config libusb
+brew install cmake ninja pkg-config libusb
 npm run build
+```
+
+### Runtime depencencies
+
+#### Debian/Ubuntu
+
+```sh
+sudo apt install -y libusb-1.0-0
+```
+
+#### macOS
+
+```sh
+brew install libusb
 ```
 
 ## Usage
