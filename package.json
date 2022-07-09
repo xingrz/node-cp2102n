@@ -6,6 +6,11 @@
   "engines": {
     "node": ">= 10.20.0"
   },
+  "binary": {
+    "napi_versions": [
+      6
+    ]
+  },
   "scripts": {
     "build:ts": "tsc -p .",
     "build:addon": "cmake-js compile",
@@ -28,7 +33,7 @@
   },
   "homepage": "https://github.com/xingrz/node-cp2102n#readme",
   "dependencies": {
-    "cmake-js": "^6.3.2"
+    "cmake-js": "^7.0.0-3"
   },
   "devDependencies": {
     "@tsconfig/node16-strictest": "^1.0.3",
