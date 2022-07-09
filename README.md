@@ -41,6 +41,48 @@ try {
 }
 ```
 
+## APIs
+
+### `openInterface(path)`
+
+* `path` - `string`
+* Returns: `Promise<CP2102N>`
+
+Open an interface with `path` (i.e. `/dev/cu.usbserialXXX` on macOS, `/dev/ttyUSBX` on Linux). Throws if `path` is not a valid CP2102N device.
+
+### Class: `CP2102N`
+
+#### `cp2102n.set(state)`
+
+* `state` - `{ [pin: number]: boolean }`
+* Returns: `Promise<{ [pin: number]: boolean }>`
+
+Set state of pins to high (`true`) or low (`false`). Returns the latest state.
+
+#### `cp2102n.get()`
+
+* Returns: `Promise<{ [pin: number]: boolean }>`
+
+Get state of all PINs.
+
+#### `cp2102n.setRaw(state, mask)`
+
+* `state` - `number`
+* `mask` - `number`
+* Returns: `Promise<number>`
+
+Set state of masked pins in bits. Returns the latest state bits.
+
+#### `cp2102n.getRaw()`
+
+* Returns: `Promise<number>`
+
+Get state of pins in bits.
+
+#### `cp2102n.close()`
+
+Close interface.
+
 ## License
 
 [MIT License](LICENSE)
