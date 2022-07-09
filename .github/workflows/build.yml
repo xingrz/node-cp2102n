@@ -1,11 +1,11 @@
 name: build
 
 on:
-  - push
-  - pull_request
+  push:
+  pull_request:
 
 jobs:
-  build-addon:
+  build-addon-posix:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -85,8 +85,8 @@ jobs:
           path: prebuilds
           retention-days: 1
 
-  build-ts:
-    needs: [build-addon, build-addon-docker]
+  npm-pack:
+    needs: [build-addon-posix, build-addon-docker]
     runs-on: ubuntu-latest
 
     outputs:
@@ -121,8 +121,8 @@ jobs:
           name: ${{ steps.build.outputs.tarball }}
           path: ${{ steps.build.outputs.tarball }}
 
-  test:
-    needs: build-ts
+  test-posix:
+    needs: npm-pack
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -139,16 +139,16 @@ jobs:
       - name: Download tarball
         uses: actions/download-artifact@v2
         with:
-          name: ${{ needs.build-ts.outputs.tarball }}
+          name: ${{ needs.npm-pack.outputs.tarball }}
 
       - name: Install tarball
-        run: npm install ${{ needs.build-ts.outputs.tarball }}
+        run: npm install ${{ needs.npm-pack.outputs.tarball }}
 
       - name: Test
         run: node -p 'require("cp2102n")'
 
   test-docker:
-    needs: build-ts
+    needs: npm-pack
     runs-on: ubuntu-latest
 
     strategy:
@@ -160,7 +160,7 @@ jobs:
       - name: Download tarball
         uses: actions/download-artifact@v2
         with:
-          name: ${{ needs.build-ts.outputs.tarball }}
+          name: ${{ needs.npm-pack.outputs.tarball }}
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -179,5 +179,5 @@ jobs:
             set -euo pipefail
             apt-get update
             apt-get install -y libusb-1.0-0
-            npm install ${{ needs.build-ts.outputs.tarball }}
+            npm install ${{ needs.npm-pack.outputs.tarball }}
             node -p 'require("cp2102n")'
