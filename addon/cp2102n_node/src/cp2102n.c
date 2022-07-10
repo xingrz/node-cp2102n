@@ -1,7 +1,4 @@
-#include <stdint.h>
-#include <stdio.h>
-#include <stdlib.h>
-
+#include "async.h"
 #include "cp2102.h"
 #include "node_api.h"
 #include "utils.h"
@@ -12,13 +9,10 @@ static napi_value interface_set(napi_env env, napi_callback_info info);
 static napi_value interface_get_serial_number(napi_env env, napi_callback_info info);
 static napi_value interface_close(napi_env env, napi_callback_info info);
 
-typedef struct {
+NAPI_ASYNC(open_interface, {
 	char path[255];
 	cp2102_dev_t *dev;
-	NAPI_DEFINE_WORK_CTX();
-} open_interface_t;
-
-NAPI_DEFINE_WORK_HANDLER(open_interface);
+})
 
 static napi_value
 open_interface(napi_env env, napi_callback_info info)
@@ -26,25 +20,16 @@ open_interface(napi_env env, napi_callback_info info)
 	NAPI_ASSERT_ARGC(1);
 	NAPI_ASSERT_ARG_TYPE(0, napi_string);
 
-	open_interface_t *ctx = (open_interface_t *)malloc(sizeof(open_interface_t));
+	NAPI_ASYNC_CREATE(promise, ctx, open_interface);
 	napi_get_value_string_utf8(env, args[0], ctx->path, sizeof(ctx->path), NULL);
 
-	NAPI_CREATE_PROMISED_WORK(promise, ctx, open_interface);
+	NAPI_ASYNC_QUEUE(promise);
 	return promise;
 }
 
-static void
-open_interface_work(napi_env env, void *data)
-{
-	open_interface_t *ctx = (open_interface_t *)data;
-	ctx->dev = cp2102_open((const char *)ctx->path);
-}
+NAPI_ASYNC_WORK(open_interface, { ctx->dev = cp2102_open((const char *)ctx->path); })
 
-static void
-open_interface_done(napi_env env, napi_status status, void *data)
-{
-	open_interface_t *ctx = (open_interface_t *)data;
-
+NAPI_ASYNC_DONE(open_interface, {
 	if (ctx->dev != NULL) {
 		NAPI_CREATE_OBJECT(result);
 
@@ -61,24 +46,18 @@ open_interface_done(napi_env env, napi_status status, void *data)
 		NAPI_CREATE_FUNTION(func_close, "close", interface_close, ctx->dev);
 		napi_set_named_property(env, result, "close", func_close);
 
-		napi_resolve_deferred(env, ctx->deferred, result);
+		NAPI_ASYNC_RESOLVE(result);
 	} else {
 		NAPI_CREATE_ERROR(error, "IoError", "Failed opening device");
-		napi_reject_deferred(env, ctx->deferred, error);
+		NAPI_ASYNC_REJECT(error);
 	}
+})
 
-	napi_delete_async_work(env, ctx->worker);
-	free(ctx);
-}
-
-typedef struct {
+NAPI_ASYNC(interface_get, {
 	cp2102_dev_t *dev;
 	uint8_t read_bits;
 	bool succeed;
-	NAPI_DEFINE_WORK_CTX();
-} interface_get_t;
-
-NAPI_DEFINE_WORK_HANDLER(interface_get);
+})
 
 static napi_value
 interface_get(napi_env env, napi_callback_info info)
@@ -86,47 +65,32 @@ interface_get(napi_env env, napi_callback_info info)
 	cp2102_dev_t *dev;
 	napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&dev);
 
-	interface_get_t *ctx = (interface_get_t *)malloc(sizeof(interface_get_t));
+	NAPI_ASYNC_CREATE(promise, ctx, interface_get);
 	ctx->dev = dev;
 
-	NAPI_CREATE_PROMISED_WORK(promise, ctx, interface_get);
+	NAPI_ASYNC_QUEUE(promise);
 	return promise;
 }
 
-static void
-interface_get_work(napi_env env, void *data)
-{
-	interface_get_t *ctx = (interface_get_t *)data;
-	ctx->succeed = cp2102_get_value(ctx->dev, &ctx->read_bits);
-}
+NAPI_ASYNC_WORK(interface_get, { ctx->succeed = cp2102_get_value(ctx->dev, &ctx->read_bits); })
 
-static void
-interface_get_done(napi_env env, napi_status status, void *data)
-{
-	interface_get_t *ctx = (interface_get_t *)data;
-
+NAPI_ASYNC_DONE(interface_get, {
 	if (ctx->succeed) {
 		NAPI_CREATE_UINT32(result, ctx->read_bits);
-		napi_resolve_deferred(env, ctx->deferred, result);
+		NAPI_ASYNC_RESOLVE(result);
 	} else {
 		NAPI_CREATE_ERROR(error, "IoError", "Failed reading device");
-		napi_reject_deferred(env, ctx->deferred, error);
+		NAPI_ASYNC_REJECT(error);
 	}
+})
 
-	napi_delete_async_work(env, ctx->worker);
-	free(ctx);
-}
-
-typedef struct {
+NAPI_ASYNC(interface_set, {
 	cp2102_dev_t *dev;
 	uint8_t write_bits;
 	uint8_t write_mask;
 	uint8_t read_bits;
 	bool succeed;
-	NAPI_DEFINE_WORK_CTX();
-} interface_set_t;
-
-NAPI_DEFINE_WORK_HANDLER(interface_set);
+})
 
 static napi_value
 interface_set(napi_env env, napi_callback_info info)
@@ -135,83 +99,52 @@ interface_set(napi_env env, napi_callback_info info)
 	NAPI_ASSERT_ARG_TYPE(0, napi_number);
 	NAPI_ASSERT_ARG_TYPE(1, napi_number);
 
-	cp2102_dev_t *dev;
-	napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&dev);
-
-	interface_set_t *ctx = (interface_set_t *)malloc(sizeof(interface_set_t));
-	ctx->dev = dev;
+	NAPI_ASYNC_CREATE(promise, ctx, interface_set);
+	napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&ctx->dev);
 	napi_get_value_uint32(env, args[0], (uint32_t *)&ctx->write_bits);
 	napi_get_value_uint32(env, args[1], (uint32_t *)&ctx->write_mask);
 
-	NAPI_CREATE_PROMISED_WORK(promise, ctx, interface_set);
+	NAPI_ASYNC_QUEUE(promise);
 	return promise;
 }
 
-static void
-interface_set_work(napi_env env, void *data)
-{
-	interface_set_t *ctx = (interface_set_t *)data;
+NAPI_ASYNC_WORK(interface_set, {
 	ctx->succeed = cp2102_set_value(ctx->dev, ctx->write_bits, ctx->write_mask) &&
 				   cp2102_get_value(ctx->dev, &ctx->read_bits);
-}
+})
 
-static void
-interface_set_done(napi_env env, napi_status status, void *data)
-{
-	interface_set_t *ctx = (interface_set_t *)data;
-
+NAPI_ASYNC_DONE(interface_set, {
 	if (ctx->succeed) {
 		NAPI_CREATE_UINT32(result, ctx->read_bits);
-		napi_resolve_deferred(env, ctx->deferred, result);
+		NAPI_ASYNC_RESOLVE(result);
 	} else {
 		NAPI_CREATE_ERROR(error, "IoError", "Failed writing device");
-		napi_reject_deferred(env, ctx->deferred, error);
+		NAPI_ASYNC_REJECT(error);
 	}
+})
 
-	napi_delete_async_work(env, ctx->worker);
-	free(ctx);
-}
-
-typedef struct {
+NAPI_ASYNC(interface_get_serial_number, {
 	cp2102_dev_t *dev;
 	const char *serial_number;
-	NAPI_DEFINE_WORK_CTX();
-} interface_get_serial_number_t;
-
-NAPI_DEFINE_WORK_HANDLER(interface_get_serial_number);
+})
 
 static napi_value
 interface_get_serial_number(napi_env env, napi_callback_info info)
 {
-	cp2102_dev_t *dev;
-	napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&dev);
+	NAPI_ASYNC_CREATE(promise, ctx, interface_get_serial_number);
+	napi_get_cb_info(env, info, NULL, NULL, NULL, (void **)&ctx->dev);
 
-	interface_get_serial_number_t *ctx =
-		(interface_get_serial_number_t *)malloc(sizeof(interface_get_serial_number_t));
-	ctx->dev = dev;
-
-	NAPI_CREATE_PROMISED_WORK(promise, ctx, interface_get_serial_number);
+	NAPI_ASYNC_QUEUE(promise);
 	return promise;
 }
 
-static void
-interface_get_serial_number_work(napi_env env, void *data)
-{
-	interface_get_serial_number_t *ctx = (interface_get_serial_number_t *)data;
-	ctx->serial_number = cp2102_get_serial_number(ctx->dev);
-}
+NAPI_ASYNC_WORK(
+	interface_get_serial_number, { ctx->serial_number = cp2102_get_serial_number(ctx->dev); })
 
-static void
-interface_get_serial_number_done(napi_env env, napi_status status, void *data)
-{
-	interface_get_serial_number_t *ctx = (interface_get_serial_number_t *)data;
-
+NAPI_ASYNC_DONE(interface_get_serial_number, {
 	NAPI_CREATE_STRING(result, ctx->serial_number);
-	napi_resolve_deferred(env, ctx->deferred, result);
-
-	napi_delete_async_work(env, ctx->worker);
-	free(ctx);
-}
+	NAPI_ASYNC_RESOLVE(result);
+})
 
 static napi_value
 interface_close(napi_env env, napi_callback_info info)

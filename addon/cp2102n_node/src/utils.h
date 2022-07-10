@@ -1,5 +1,8 @@
-#ifndef __CP2102N_UTILS__
-#define __CP2102N_UTILS__
+#pragma once
+
+#include <stdint.h>
+
+#include "node_api.h"
 
 #define NAPI_ASSERT_ARGC(N)                                                \
 	size_t argc = N;                                                       \
@@ -20,12 +23,6 @@
 			napi_throw_error(env, "Error", "Invalid argument type"); \
 			return NULL;                                             \
 		}                                                            \
-	}
-
-#define NAPI_GET_STRING(VAR, SIZE, FROM_VALUE)                               \
-	char VAR[SIZE];                                                          \
-	{                                                                        \
-		napi_get_value_string_utf8(env, FROM_VALUE, VAR, sizeof(VAR), NULL); \
 	}
 
 #define NAPI_CREATE_OBJECT(VAR)        \
@@ -59,23 +56,3 @@
 	{                                                        \
 		napi_create_uint32(env, (uint32_t)FROM_VALUE, &VAR); \
 	}
-
-#define NAPI_DEFINE_WORK_CTX() \
-	napi_deferred deferred;    \
-	napi_async_work worker;
-
-#define NAPI_DEFINE_WORK_HANDLER(HANDLER)                 \
-	static void HANDLER##_work(napi_env env, void *data); \
-	static void HANDLER##_done(napi_env env, napi_status status, void *data);
-
-#define NAPI_CREATE_PROMISED_WORK(VAR, CTX, HANDLER)                                      \
-	napi_value VAR;                                                                       \
-	{                                                                                     \
-		napi_create_promise(env, &CTX->deferred, &VAR);                                   \
-		NAPI_CREATE_STRING(resource_name, #HANDLER);                                      \
-		napi_create_async_work(                                                           \
-			env, NULL, resource_name, HANDLER##_work, HANDLER##_done, CTX, &CTX->worker); \
-		napi_queue_async_work(env, CTX->worker);                                          \
-	}
-
-#endif  // __CP2102N_UTILS__
