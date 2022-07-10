@@ -1,0 +1,13 @@
+BasedOnStyle: Google
+AlignAfterOpenBracket: DontAlign
+AlignTrailingComments: false
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortLoopsOnASingleLine: false
+ColumnLimit: 100
+CommentPragmas: NOLINT:.*
+ContinuationIndentWidth: 4
+DerivePointerAlignment: false
+IndentWidth: 4
+PointerAlignment: Right
+SortIncludes: true
+TabWidth: 4

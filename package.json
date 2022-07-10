@@ -33,7 +33,8 @@
   },
   "homepage": "https://github.com/xingrz/node-cp2102n#readme",
   "dependencies": {
-    "cmake-js": "^7.0.0-3"
+    "cmake-js": "^7.0.0-3",
+    "node-addon-api": "^5.0.0"
   },
   "devDependencies": {
     "@tsconfig/node16-strictest": "^1.0.3",

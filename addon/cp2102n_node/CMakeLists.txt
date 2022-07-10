@@ -1,6 +1,8 @@
 project(cp2102n)
 
-set(SRCS "src/cp2102n.c")
+set(CMAKE_CXX_STANDARD 11)
+
+set(SRCS "src/cp2102n.cc")
 
 add_library(${PROJECT_NAME} SHARED
     ${SRCS}
