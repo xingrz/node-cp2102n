@@ -1,6 +1,6 @@
 {
   "name": "cp2102n",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Cross-platform Node.js binding for controlling GPIOs on Silicon Labs CP2102N",
   "main": "lib/index.js",
   "engines": {
