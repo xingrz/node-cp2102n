@@ -128,7 +128,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
-        node: ['10', '12', '14', '16', '18', 'lts/*', 'current']
+        node: ['14', '16', '18', 'lts/*', 'current']
 
     steps:
       - name: Use Node.js ${{ matrix.node }} on ${{ matrix.os }}
@@ -154,7 +154,7 @@ jobs:
     strategy:
       matrix:
         platform: [linux/arm/v7, linux/arm64]
-        node: ['10', '12', '14', '16', '18', 'lts', 'latest']
+        node: ['14', '16', '18', 'lts', 'latest']
 
     steps:
       - name: Download tarball

@@ -17,6 +17,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_link_libraries(${PROJECT_NAME} ${CMAKE_JS_LIB})
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_JS_INC})
 
-target_compile_definitions(${PROJECT_NAME} PRIVATE -DNAPI_VERSION=6)
+target_compile_definitions(${PROJECT_NAME} PRIVATE -DNAPI_VERSION=7)
 
 target_link_libraries(${PROJECT_NAME} cp2102_usb)
