@@ -45,6 +45,10 @@ class CP2102N {
   async getSerialNumber(): Promise<string> {
     return await this.intf.getSerialNumber();
   }
+
+  close(): void {
+    this.intf.close();
+  }
 }
 
 export async function openInterface(path: string): Promise<CP2102N> {
