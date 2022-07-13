@@ -3,18 +3,18 @@ import binding, { Interface } from './binding';
 const CP2102N_PORTS = 7;
 
 class CP2102N {
-  private readonly intf: Interface;
+  private intf: Interface | undefined;
 
   constructor(intf: Interface) {
     this.intf = intf;
   }
 
   async getRaw(): Promise<number> {
-    return await this.intf.get();
+    return await this.intf?.get() || 0;
   }
 
   async get(): Promise<Record<number, boolean>> {
-    const read_bits = await this.intf.get();
+    const read_bits = await this.getRaw();
     const result: Record<number, boolean> = {};
     for (let i = 0; i < CP2102N_PORTS; i++) {
       result[i] = (read_bits & (1 << i)) != 0;
@@ -23,7 +23,7 @@ class CP2102N {
   }
 
   async setRaw(state: number, mask: number): Promise<number> {
-    return await this.intf.set(state, mask);
+    return await this.intf?.set(state, mask) || 0;
   }
 
   async set(state: Record<number, boolean>): Promise<Record<number, boolean>> {
@@ -34,7 +34,7 @@ class CP2102N {
         write_mask |= (1 << i);
       }
     }
-    const read_bits = await this.intf.set(write_bits, write_mask);
+    const read_bits = await this.setRaw(write_bits, write_mask);
     const result: Record<number, boolean> = {};
     for (let i = 0; i < CP2102N_PORTS; i++) {
       result[i] = (read_bits & (1 << i)) != 0;
@@ -42,12 +42,13 @@ class CP2102N {
     return result;
   }
 
-  async getSerialNumber(): Promise<string> {
-    return await this.intf.getSerialNumber();
+  async getSerialNumber(): Promise<string | undefined> {
+    return await this.intf?.getSerialNumber();
   }
 
   close(): void {
-    this.intf.close();
+    this.intf?.close();
+    this.intf = undefined;
   }
 }
 
